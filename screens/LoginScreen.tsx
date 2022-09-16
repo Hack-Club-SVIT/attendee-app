@@ -20,7 +20,7 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<"Login">) => {
 			})
 			.then(r => {
 				navigation.navigate("AddEntry");
-				console.log("LOGIN SUCCESS");
+				console.log("LOGIN SUCCESS", r.data.jwt);
 			})
 			.catch(() => {
 				console.error("ERROR");
