@@ -27,7 +27,7 @@ const Gender = {
 };
 
 export default function AddEntry({ navigation }: RootStackScreenProps<"AddEntry">) {
-    const { camera_image } = useContext(MainContext);
+    const { camera_image, setLoggedIn } = useContext(MainContext);
     const [gender, setGender] = useState("");
     const [name, setName] = useState("");
     const [mobile, setMobile] = useState("");
@@ -87,6 +87,7 @@ export default function AddEntry({ navigation }: RootStackScreenProps<"AddEntry"
     };
 
     const handleLogout = () => {
+        setLoggedIn(false);
         AsyncStorage.removeItem("token", () => {
             navigation.navigate("Login");
         });

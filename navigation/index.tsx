@@ -23,6 +23,7 @@ import TabTwoScreen from "../screens/TabTwoScreen";
 import TakePicture from "../screens/TakePicture";
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
+import MainContext from "../context";
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
     return (
@@ -39,12 +40,11 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
+    const { logged_in, setLoggedIn } = React.useContext(MainContext);
     React.useEffect(() => {
         interceptor();
         getInitialRoute();
     }, []);
-
-    const [logged, setLogged] = React.useState(true);
 
     const interceptor = () => {
         axios.interceptors.request.use(
@@ -71,18 +71,16 @@ function RootNavigator() {
     const getInitialRoute = async () => {
         const token = await AsyncStorage.getItem("token");
 
-        console.log("token here", token);
-
         if (token) {
-            setLogged(true);
+            setLoggedIn(true);
         } else {
-            setLogged(false);
+            setLoggedIn(false);
         }
     };
 
     return (
         <Stack.Navigator>
-            {logged ? (
+            {logged_in ? (
                 <Stack.Screen name="AddEntry" component={AddEntry} options={{ headerShown: false }} />
             ) : (
                 <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
