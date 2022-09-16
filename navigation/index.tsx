@@ -7,8 +7,10 @@ import { FontAwesome } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import axios from "axios";
 import * as React from "react";
 import { ColorSchemeName, Pressable } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
@@ -37,6 +39,32 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
+    React.useEffect(() => {
+        interceptor();
+    }, []);
+
+    const interceptor = () => {
+        axios.interceptors.request.use(
+            async function (request) {
+                let token = await AsyncStorage.getItem("token");
+
+                if (request.headers) {
+                    if (token) {
+                        token = JSON.parse(token || "");
+                        request.headers.Authorization = `bearer ${token}`;
+                    }
+                    request.headers["Content-Type"] = "application/json";
+                }
+
+                return request;
+            },
+            function (error) {
+                return Promise.reject(error);
+            }
+        );
+        axios.defaults.baseURL = "https://api.hackclubsvit.co";
+    };
+
     return (
         <Stack.Navigator>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />

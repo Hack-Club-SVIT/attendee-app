@@ -8,14 +8,12 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<"Login">) => {
     const [password, setPassword] = useState("");
 
     const handleSubmit = () => {
-        navigation.navigate("AddEntry");
-
         if (email.trim().length == 0 || password.trim().length === 0) {
             return Toast.show({ description: "Email or Password missing" });
         }
 
         axios
-            .post("https://api.hackclubsvit.co/api/auth/local", {
+            .post("/api/auth/local", {
                 identifier: email,
                 password,
             })
@@ -23,8 +21,8 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<"Login">) => {
                 navigation.navigate("AddEntry");
                 console.log("LOGIN SUCCESS", r.data.jwt);
             })
-            .catch(() => {
-                console.error("ERROR");
+            .catch((error) => {
+                console.error("ERROR", error);
                 Toast.show({ description: "Invalid email or password" });
             });
     };
