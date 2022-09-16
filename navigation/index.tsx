@@ -41,7 +41,10 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
     React.useEffect(() => {
         interceptor();
+        getInitialRoute();
     }, []);
+
+    const [logged, setLogged] = React.useState(true);
 
     const interceptor = () => {
         axios.interceptors.request.use(
@@ -65,10 +68,25 @@ function RootNavigator() {
         axios.defaults.baseURL = "https://api.hackclubsvit.co";
     };
 
+    const getInitialRoute = async () => {
+        const token = await AsyncStorage.getItem("token");
+
+        console.log("token here", token);
+
+        if (token) {
+            setLogged(true);
+        } else {
+            setLogged(false);
+        }
+    };
+
     return (
         <Stack.Navigator>
-            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="AddEntry" component={AddEntry} options={{ headerShown: false }} />
+            {logged ? (
+                <Stack.Screen name="AddEntry" component={AddEntry} options={{ headerShown: false }} />
+            ) : (
+                <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+            )}
             <Stack.Screen name="TakePicture" component={TakePicture} options={{ headerShown: false }} />
             <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
             <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: "Oops!" }} />
