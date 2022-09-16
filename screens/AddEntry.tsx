@@ -1,6 +1,8 @@
-import { Camera, CameraType } from "expo-camera";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { Camera } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
 import {
-	Box,
 	Button,
 	FormControl,
 	HStack,
@@ -8,25 +10,39 @@ import {
 	Input,
 	KeyboardAvoidingView,
 	Radio,
-	Text,
 	TextArea,
 	Toast,
-	View,
 	VStack,
 } from "native-base";
 import React, { useContext, useState } from "react";
-import { KeyboardAccessoryView } from "react-native-keyboard-accessory";
-import { RootStackScreenProps } from "../types";
-import * as ImagePicker from "expo-image-picker";
-import { Platform, SafeAreaView } from "react-native";
 import MainContext from "../context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+import { RootStackScreenProps } from "../types";
+// import * as FileSystem from "expo-file-system";
 
 const Gender = {
 	Male: "MALE",
 	Female: "FEMALE",
 };
+
+// const uploadToStrapi = async (resource_uri: any, parameters: any) => {
+// 	try {
+// 		let uploading = await FileSystem.uploadAsync(
+// 			"https://api.hackclubsvit.co/api/upload",
+// 			resource_uri,
+// 			{
+// 				uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+// 				httpMethod: "POST",
+// 				fieldName: "files",
+// 				parameters,
+// 			}
+// 		);
+// 		//returns server response
+// 		return uploading;
+// 	} catch (error) {
+// 		console.log("Error", error);
+// 		return error;
+// 	}
+// };
 
 export default function AddEntry({
 	navigation,
@@ -90,38 +106,51 @@ export default function AddEntry({
 				let form_data = new FormData();
 				if (gender == Gender.Female) return;
 				if (camera_image) {
-					form_data.append("files", {
-						name: camera_image.fileName,
-						type: camera_image.type,
-						uri: camera_image,
-						data: camera_image.data,
-					});
+					// await uploadToStrapi(camera_image.uri, {
+					// 	refId: r.data.id,
+					// 	field: "photo",
+					// 	ref: "attendee",
+					// });
+					let imgBlob = await (await fetch(camera_image.uri)).blob();
+					console.log("blob", imgBlob);
+					form_data.append("files", imgBlob, name);
 					form_data.append("refId", r.data.id);
 					form_data.append("field", "photo");
 					form_data.append("ref", "attendee");
-				}
-				if (image) {
-					form_data.append("files", image);
+				} else if (image) {
+					let imgBlob = await (await fetch(image)).blob();
+					console.log("blob", imgBlob);
+
+					form_data.append("files", imgBlob, name);
 					form_data.append("refId", r.data.id);
 					form_data.append("field", "photo");
 					form_data.append("ref", "attendee");
+					// await uploadToStrapi(image, {
+					// 	refId: r.data.id,
+					// 	field: "photo",
+					// 	ref: "attendee",
+					// });
+					// 	form_data.append("files", image);
+					// 	form_data.append("refId", r.data.id);
+					// 	form_data.append("field", "photo");
+					// 	form_data.append("ref", "attendee");
 				}
-				axios
-					.post("/api/upload", form_data)
-					.then(r => {
-						console.log("UPLOAD SUCC");
-					})
-					.catch(err =>
-						console.log(
-							"UPLOAD ERROR: ",
-							JSON.stringify(err.response)
-						)
-					);
+				// axios
+				// 	.post("/api/upload", form_data)
+				// 	.then(r => {
+				// 		console.log("UPLOAD SUCC");
+				// 	})
+				// 	.catch(err =>
+				// 		console.log(
+				// 			"UPLOAD ERROR: ",
+				// 			JSON.stringify(err.response)
+				// 		)
+				// 	);
 				await AsyncStorage.setItem("token", r.data.jwt);
 				navigation.navigate("AddEntry");
 			})
 			.catch(error => {
-				console.error("ERROR", JSON.stringify(error.response));
+				console.error("ERROR", JSON.stringify(error));
 				Toast.show({
 					description: "Invalid email or password",
 				});
