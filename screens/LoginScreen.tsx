@@ -19,8 +19,8 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<"Login">) => {
                 password,
             })
             .then((r) => {
-                navigation.navigate("AddEntry");
                 AsyncStorage.setItem("token", r.data.jwt);
+                navigation.navigate("AddEntry");
             })
             .catch((error) => {
                 console.error("ERROR", error);
