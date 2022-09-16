@@ -2,6 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { NativeBaseProvider } from "native-base";
 import { SafeAreaView } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { MainContextProvider } from "./context";
 
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
@@ -17,14 +18,16 @@ export default function App() {
         return null;
     } else {
         return (
-            <SafeAreaView style={{ flex: 1 }}>
-                <NativeBaseProvider>
-                    <SafeAreaProvider>
-                        <Navigation colorScheme={colorScheme} />
-                        <StatusBar />
-                    </SafeAreaProvider>
-                </NativeBaseProvider>
-            </SafeAreaView>
+            <MainContextProvider>
+                <SafeAreaView style={{ flex: 1 }}>
+                    <NativeBaseProvider>
+                        <SafeAreaProvider>
+                            <Navigation colorScheme={colorScheme} />
+                            <StatusBar />
+                        </SafeAreaProvider>
+                    </NativeBaseProvider>
+                </SafeAreaView>
+            </MainContextProvider>
         );
     }
 }

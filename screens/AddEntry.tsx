@@ -12,10 +12,11 @@ import {
     View,
     VStack,
 } from "native-base";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { KeyboardAccessoryView } from "react-native-keyboard-accessory";
 import { RootStackScreenProps } from "../types";
 import * as ImagePicker from "expo-image-picker";
+import MainContext from "../context";
 
 const Gender = {
     Male: "MALE",
@@ -23,6 +24,7 @@ const Gender = {
 };
 
 export default function AddEntry({ navigation }: RootStackScreenProps<"AddEntry">) {
+    const { camera_image } = useContext(MainContext);
     const [gender, setGender] = useState("");
     const [name, setName] = useState("");
     const [mobile, setMobile] = useState("");
@@ -77,6 +79,7 @@ export default function AddEntry({ navigation }: RootStackScreenProps<"AddEntry"
             mobile,
             address,
             age,
+            camera_image,
         });
     };
 

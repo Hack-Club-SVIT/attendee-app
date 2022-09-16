@@ -1,11 +1,13 @@
-import { Camera, CameraType } from "expo-camera";
-import { Button, Text, View } from "native-base";
-import React, { useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { Camera } from "expo-camera";
+import { Button, View } from "native-base";
+import React, { useContext, useRef } from "react";
+import { StyleSheet } from "react-native";
+import MainContext from "../context";
 import { RootStackScreenProps } from "../types";
 
 export default function TakePicture({ navigation }: RootStackScreenProps<"TakePicture">) {
     const cameraRef = useRef<any>();
+    const { setCameraImage } = useContext(MainContext);
 
     const takePicture = async () => {
         const options = {
@@ -15,6 +17,8 @@ export default function TakePicture({ navigation }: RootStackScreenProps<"TakePi
         };
 
         const photo = await cameraRef.current.takePictureAsync(options);
+
+        setCameraImage(photo);
 
         navigation.goBack();
     };

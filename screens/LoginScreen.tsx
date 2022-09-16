@@ -8,6 +8,7 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<"Login">) => {
 
     const handleSubmit = () => {
         navigation.navigate("AddEntry");
+
         if (email.trim().length == 0 || password.trim().length === 0) {
             return Toast.show({ description: "Email or Password missing" });
         }
