@@ -2,6 +2,7 @@ import axios from "axios";
 import { Button, FormControl, Input, Toast, VStack } from "native-base";
 import React, { useState } from "react";
 import { RootStackScreenProps } from "../types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen = ({ navigation }: RootStackScreenProps<"Login">) => {
     const [email, setEmail] = useState("");
@@ -19,7 +20,7 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<"Login">) => {
             })
             .then((r) => {
                 navigation.navigate("AddEntry");
-                console.log("LOGIN SUCCESS", r.data.jwt);
+                AsyncStorage.setItem("token", r.data.jwt);
             })
             .catch((error) => {
                 console.error("ERROR", error);
