@@ -20,6 +20,7 @@ export type RootStackParamList = {
     Login: undefined;
     AddEntry: undefined;
     TakePicture: undefined;
+    Scanner: undefined;
 };
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<
