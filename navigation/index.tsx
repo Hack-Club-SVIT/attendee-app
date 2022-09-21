@@ -14,7 +14,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
-import AddEntry from "../screens/AddEntry";
 import LoginScreen from "../screens/LoginScreen";
 import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
@@ -85,7 +84,6 @@ function RootNavigator() {
             ) : (
                 <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             )}
-            <Stack.Screen name="AddEntry" component={AddEntry} options={{ headerShown: false }} />
             <Stack.Screen name="TakePicture" component={TakePicture} options={{ headerShown: false }} />
             <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
             <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: "Oops!" }} />
