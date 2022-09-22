@@ -1,11 +1,13 @@
 import axios from "axios";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import {
+	Badge,
 	Button,
 	Heading,
 	HStack,
 	Image,
 	Input,
+	Tag,
 	Text,
 	Toast,
 	View,
@@ -96,6 +98,57 @@ export default function Scanner() {
 	);
 	const [gender, setGender] = useState<"MALE" | "FEMALE">("FEMALE");
 
+	const fetchData = async (id: number, female?: boolean) => {
+		console.log("ID", id);
+		try {
+			if (female) {
+				const res = await axios.get<IResponse>(
+					`/api/females/${id}?populate=*`
+				);
+				return res.data.data;
+			}
+			const res = await axios.get<IResponse>(
+				`/api/males/${id}?populate=*`
+			);
+			// console.log(
+			// 	JSON.stringify(
+			// 		res.data.data.attributes.photo.data.attributes.formats
+			// 	)
+			// );
+
+			return res.data.data;
+		} catch (err) {
+			return Toast.show({ description: "Something wrong, try again" });
+		}
+	};
+
+	const dateArr = [
+		null,
+		"2022-09-26",
+		"2022-09-27",
+		"2022-09-28",
+		"2022-09-29",
+		"2022-09-30",
+		"2022-10-01",
+		"2022-10-02",
+		"2022-10-03",
+		"2022-10-04",
+		"2022-10-05",
+	];
+
+	const getAttendanceId = () => {
+		let d = new Date();
+		let dd = String(d.getDate()).padStart(2, "0");
+		let mm = String(d.getMonth() + 1).padStart(2, "0"); //January is 0!
+		let yyyy = d.getFullYear();
+
+		const today = `${yyyy}-${mm}-${dd}`;
+		// const today = "2022-09-29";
+
+		const attendance_id = dateArr.findIndex(i => i == today);
+		return attendance_id;
+	};
+
 	const handleBarCodeScan = ({ data }: { data: string }) => {
 		if (!data && !input_data) {
 			return Toast.show({ description: "Please enter Participant ID" });
@@ -141,7 +194,7 @@ export default function Scanner() {
 		setAppState("LOADING");
 		setShowScanner(false);
 
-		const id = parseInt(str.substring(1), 5);
+		const id = parseInt(str.substring(1));
 
 		if (str[0] === "F") {
 			setGender("FEMALE");
@@ -170,33 +223,31 @@ export default function Scanner() {
 		}
 	};
 
-	const fetchData = async (id: number, female?: boolean) => {
-		console.log("ID", id);
-		try {
-			if (female) {
-				const res = await axios.get<IResponse>(
-					`/api/females/${id}?populate=*`
-				);
-				return res.data.data;
-			}
-			const res = await axios.get<IResponse>(
-				`/api/males/${id}?populate=*`
-			);
-			console.log(
-				JSON.stringify(
-					res.data.data.attributes.photo.data.attributes.formats
-				)
-			);
+	const handleAttendanceUpdate = async (member_id: number) => {
+		const current_attendances = data?.attributes.attendances.data.map(
+			i => i.id
+		);
 
-			return res.data.data;
-		} catch (err) {
+		const attendance_id = getAttendanceId();
+
+		const already_updated = current_attendances?.includes(attendance_id);
+
+		if (attendance_id == -1)
+			return Toast.show({
+				description: "Attendance will be active during navratri",
+			});
+		if (already_updated) return;
+
+		if (!current_attendances)
 			return Toast.show({ description: "Something wrong, try again" });
-		}
+
+		axios
+			.put(`/api/males/${member_id}`, {
+				attendances: [...current_attendances, attendance_id],
+			})
+			.then(r => console.log(r.data))
+			.catch(err => {});
 	};
-
-	// const handleAttendance =async()=>{
-
-	// };
 	if (app_state == "LOADING") {
 		return (
 			<HStack
@@ -232,28 +283,63 @@ export default function Scanner() {
 								<Heading>{data.attributes.name}</Heading>
 								<HStack pt={4}>
 									<Text fontSize='lg'>ID: </Text>
-									<Text fontSize='lg'>{data.id}</Text>
-								</HStack>
-								<HStack>
-									<Text fontSize='lg'>Age: </Text>
-									<Text fontSize='lg'>
-										{data.attributes.age}
+									<Text fontSize='lg' fontWeight='bold'>
+										VGV
+										{gender[0] +
+											String(data.id).padStart(4, "0")}
 									</Text>
 								</HStack>
+								{data.attributes.age && (
+									<HStack>
+										<Text fontSize='lg'>Age: </Text>
+										<Text fontSize='lg'>
+											{data.attributes.age}
+										</Text>
+									</HStack>
+								)}
+								{data.attributes.attendances && (
+									<HStack>
+										<Text fontSize='lg'>
+											Days Attended:{" "}
+										</Text>
+										<HStack space={2}></HStack>
+										<Text fontSize='lg'>
+											{data.attributes.attendances.data.map(
+												(att, i) => (
+													<Badge
+														rounded='full'
+														key={i}
+														bg='green.300'
+													>
+														{att.id}
+													</Badge>
+												)
+											)}
+										</Text>
+									</HStack>
+								)}
 								{gender == "MALE" && (
 									<>
-										<HStack>
-											<Text fontSize='lg'>Mobile: </Text>
-											<Text fontSize='lg'>
-												{data.attributes.mobile}
-											</Text>
-										</HStack>
-										<HStack>
-											<Text fontSize='lg'>Address: </Text>
-											<Text fontSize='lg'>
-												{data.attributes.address}
-											</Text>
-										</HStack>
+										{data.attributes.mobile && (
+											<HStack>
+												<Text fontSize='lg'>
+													Mobile:{" "}
+												</Text>
+												<Text fontSize='lg'>
+													{data.attributes.mobile}
+												</Text>
+											</HStack>
+										)}
+										{data.attributes.address && (
+											<HStack>
+												<Text fontSize='lg'>
+													Address:{" "}
+												</Text>
+												<Text fontSize='lg'>
+													{data.attributes.address}
+												</Text>
+											</HStack>
+										)}
 									</>
 								)}
 							</VStack>
@@ -265,10 +351,7 @@ export default function Scanner() {
 						<Button
 							size='lg'
 							onPress={() => {
-								setScanned(false);
-								setShowScanner(true);
-								setLoading(false);
-								setData(undefined);
+								handleAttendanceUpdate(data.id);
 							}}
 						>
 							Done

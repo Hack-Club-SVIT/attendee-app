@@ -18,11 +18,11 @@ export default function App() {
 	} else {
 		return (
 			<MainContextProvider>
-				<SafeAreaView style={{ flex: 1 }}>
+				<SafeAreaView style={{ flex: 1, backgroundColor: "#fafafa" }}>
 					<NativeBaseProvider>
 						<SafeAreaProvider>
-							<Navigation colorScheme={colorScheme} />
 							<StatusBar />
+							<Navigation colorScheme={colorScheme} />
 						</SafeAreaProvider>
 					</NativeBaseProvider>
 				</SafeAreaView>
