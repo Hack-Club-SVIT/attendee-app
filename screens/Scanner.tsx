@@ -149,17 +149,39 @@ export default function Scanner() {
 		return attendance_id;
 	};
 
+	const authVIP = (id: string | number) => {
+		const vips = {
+			2951: "Patel Ronak Ghanshyambhai",
+			2952: "Patel Hardik Vasantbhai",
+			2953: "Patel Gaurang Arvindbhai",
+			2954: "Patel Alpeshbhai Prafulbhai",
+			2955: "Patel Naitikbhai Markandbhai",
+			2956: "Patel Dineshbhai Manibhai",
+			2957: "Patel Saileshbhai Rasikbhai",
+			2958: "Patel Kinkal Bhupendrabhai",
+			2959: "Patel Hemant Navneetbhai",
+			2960: "Patel Sanjaybhai Arvindbhai",
+		};
+
+		setAppState("SCAN");
+
+		setStringInput("");
+		setShowScanner(true);
+		return Toast.show({
+			description: `You are authorized by ${vips[id as string]}`,
+		});
+	};
+
 	const handleBarCodeScan = ({ data }: { data: string }) => {
 		if (!data && !input_data) {
 			return Toast.show({ description: "Please enter Participant ID" });
 		}
+		const id = (data.replace(/^\D+/g, "") as any) * 1;
 
 		Vibration.vibrate(30);
 		setAppState("LOADING");
 		setScanned(true);
 		setShowScanner(false);
-
-		const id = parseInt(data.substring(4), 10);
 
 		if (data[3] === "F") {
 			setGender("FEMALE");
@@ -173,6 +195,7 @@ export default function Scanner() {
 					setAppState("SCAN");
 				});
 		} else {
+			if (id >= 2951 && id <= 2960) return authVIP(id);
 			setGender("MALE");
 			// Male
 			fetchData(id)
@@ -194,7 +217,8 @@ export default function Scanner() {
 		setAppState("LOADING");
 		setShowScanner(false);
 
-		const id = parseInt(str.substring(1));
+		const id = (str.replace(/^\D+/g, "") as any) * 1;
+		console.log(id);
 
 		if (str[0] === "F") {
 			setGender("FEMALE");
@@ -209,6 +233,7 @@ export default function Scanner() {
 					setAppState("SCAN");
 				});
 		} else {
+			if (id >= 2951 && id <= 2960) return authVIP(id);
 			setGender("MALE");
 			// Male
 			fetchData(id)
@@ -246,7 +271,12 @@ export default function Scanner() {
 				attendances: [...current_attendances, attendance_id],
 			})
 			.then(r => console.log(r.data))
-			.catch(err => {});
+			.catch(err => {})
+			.finally(() => {
+				setStringInput("");
+				setAppState("SCAN");
+				setShowScanner(true);
+			});
 	};
 	if (app_state == "LOADING") {
 		return (
