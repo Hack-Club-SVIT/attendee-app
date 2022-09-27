@@ -270,7 +270,10 @@ export default function Scanner() {
 			.put(`/api/males/${member_id}`, {
 				attendances: [...current_attendances, attendance_id],
 			})
-			.then(r => console.log(r.data))
+			.then(r => {
+				console.log(r.data);
+				return Toast.show({ description: "Attendance updated" });
+			})
 			.catch(err => {})
 			.finally(() => {
 				setStringInput("");
