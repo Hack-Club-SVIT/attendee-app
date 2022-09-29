@@ -99,22 +99,20 @@ export default function Scanner() {
 	const [gender, setGender] = useState<"MALE" | "FEMALE">("FEMALE");
 
 	const fetchData = async (id: number, female?: boolean) => {
-		console.log("ID", id);
+		console.log("Fetching ID", id);
 		try {
 			if (female) {
 				const res = await axios.get<IResponse>(
 					`/api/females/${id}?populate=*`
 				);
+				console.log("Fetched female ID", res.data.data.id);
+
 				return res.data.data;
 			}
 			const res = await axios.get<IResponse>(
 				`/api/males/${id}?populate=*`
 			);
-			// console.log(
-			// 	JSON.stringify(
-			// 		res.data.data.attributes.photo.data.attributes.formats
-			// 	)
-			// );
+			console.log("Fetched male ID", res.data.data.id);
 
 			return res.data.data;
 		} catch (err) {
@@ -218,7 +216,6 @@ export default function Scanner() {
 		setShowScanner(false);
 
 		const id = (str.replace(/^\D+/g, "") as any) * 1;
-		console.log(id);
 
 		if (str[0] === "F") {
 			setGender("FEMALE");
@@ -261,25 +258,35 @@ export default function Scanner() {
 			return Toast.show({
 				description: "Attendance will be active during navratri",
 			});
-		if (already_updated) return;
+		if (already_updated)
+			return Toast.show({
+				description: "Attendance exists",
+			});
 
 		if (!current_attendances)
 			return Toast.show({ description: "Something wrong, try again" });
-
-		axios
-			.put(`/api/males/${member_id}`, {
-				attendances: [...current_attendances, attendance_id],
-			})
-			.then(r => {
-				console.log(r.data);
-				return Toast.show({ description: "Attendance updated" });
-			})
-			.catch(err => {})
-			.finally(() => {
-				setStringInput("");
-				setAppState("SCAN");
-				setShowScanner(true);
+		try {
+			const res = await axios.put(`/api/males/${member_id}`, {
+				data: {
+					attendances: [...current_attendances, attendance_id],
+				},
 			});
+			console.log(
+				"ATTENDANCE RESPONSE",
+				JSON.stringify(res.data, null, 2)
+			);
+
+			Toast.show({ description: "Attendance updated" });
+		} catch (err: any) {
+			console.log(
+				"ATTENDANCE ERROR",
+				JSON.stringify(err?.response, null, 2)
+			);
+		} finally {
+			setStringInput("");
+			setAppState("SCAN");
+			setShowScanner(true);
+		}
 	};
 	if (app_state == "LOADING") {
 		return (
